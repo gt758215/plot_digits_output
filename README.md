@@ -20,4 +20,6 @@
 
 #### Finally, polling those two dictionary, and plot PNG figure like:
 
-![alt text](https://github.com/gt758215/plot_digits_output/blob/master/resnet50_momentun_epoch90.png)
+<p align="left">
+  <img src="yhttps://github.com/gt758215/plot_digits_output/blob/master/resnet50_momentun_epoch90.png" width="350"/>
+</p>
