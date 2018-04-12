@@ -1,21 +1,23 @@
-# plot_digits_output
+# plot\_digits\_output
 
-Digits log output Parser
+### <i>Digits log output Parser</i>
 
-cmd: python plot.py [filename]
+#### command:
 
+<code>python plot.py [filename]</code>
 
+#### This program find either strings of below in every line:
 
-This program find either strings of below in every line:
-[INFO] Training
-[INFO] Validation
+* [INFO] Training
+* [INFO] Validation
 
-If found, it will catch four parameters in the line, and store them into train or val dictionary.
-lr = [%d.%d]
-accuracy = [%d.%d]
-loss = [%d.%d]
-epoch [%d.%d]
+#### If found, it will catch four parameters in the line, and store them into train or val dictionary.
 
-Finally, polling those two dictionary, and plot PNG figure like:
+* lr = [%d.%d]
+* accuracy = [%d.%d]
+* loss = [%d.%d]
+* epoch [%d.%d]
+
+#### Finally, polling those two dictionary, and plot PNG figure like:
 
 ![alt text](https://github.com/gt758215/plot_digits_output/blob/master/resnet50_momentun_epoch90.png)
