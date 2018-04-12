@@ -1,6 +1,6 @@
 # plot\_digits\_output
 
-### <i>Digits log output Parser</i>
+### *Digits log output Parser*
 
 #### command:
 
@@ -13,13 +13,13 @@
 
 #### If found, it will catch four parameters in the line, and store them into train or val dictionary.
 
-* lr = [%d.%d]
-* accuracy = [%d.%d]
-* loss = [%d.%d]
-* epoch [%d.%d]
+* lr = *[%d.%d]*
+* accuracy = *[%d.%d]*
+* loss = *[%d.%d]*
+* epoch *[%d.%d]*
 
-#### Finally, polling those two dictionary, and plot PNG figure like:
+#### Finally, polling those two dictionary, and output PNG figure like this:
 
 <p align="left">
-  <img src="https://github.com/gt758215/plot_digits_output/blob/master/resnet50_momentun_epoch90.png" width="350"/>
+  <img src="./resnet50_momentun_epoch90.png" width="350"/>
 </p>
