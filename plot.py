@@ -3,8 +3,6 @@ import re
 import sys
 import matplotlib.pyplot as plt
 
-
-
 #file_name = 'record_1.txt'
 if len(sys.argv) < 2:
     print('No input')
@@ -19,10 +17,8 @@ else:
     file_out = '.'.join(file_out[:-1])
 
 
-lr_reg = re.compile('lr\s\=\s(\d+(\.\d+)?)')
-acc_reg = re.compile('accuracy\s\=\s(\d+(\.\d+)?)')
-loss_reg = re.compile('loss\s\=\s(\d+(\.\d+)?)')
 epoch_reg = re.compile('epoch\s(\d+(\.\d+)?)')
+parser_reg = re.compile('\s(\w+)\s\=\s([.0-9]*)')
 
 train_reg = re.compile('\[INFO\] (Training)')
 val_reg = re.compile('\[INFO\] (Validation)')
@@ -37,6 +33,13 @@ def my_find(reg, line):
     else:
         return None
 
+def my_find2(reg, line):
+    m = reg.findall(line)
+    if m:
+        return m
+    else:
+        return None
+
 while True:
     line = file_in.readline()
     if not line:
@@ -47,145 +50,110 @@ while True:
         continue
 
     stage = is_train if is_train else is_val
+    found_text = my_find2(parser_reg, line)
+    def find(list, str):
+        if not list:
+            return False
+        for k, v in list:
+            if k == str:
+                return True
+        return False
 
-    loss = my_find(loss_reg, line)
-    if not loss:
+    if not find(found_text, 'loss'):
         continue
-    lr = my_find(lr_reg, line)
-    acc = my_find(acc_reg, line)
+
     epoch = my_find(epoch_reg, line)
-    #print("%s %s %s %s %s" % (stage, epoch, lr, loss, acc))
+
     if(stage == 'Training'):
-        dict_train[float(epoch)] = (lr, loss, acc)
+        dict_train[float(epoch)] = found_text
     else:
-        dict_val[float(epoch)] = (lr, loss, acc)
-
-
-'''
-
-import pandas as pd
-from pandas.plotting import table
-
-train_table = []
-val_table = []
-
-for key in sorted(dict_train.iterkeys()):
-    tmp = []
-    tmp.append(key)
-    a, b, c = dict_train.get(key)
-    tmp.append(a)
-    tmp.append(b)
-    tmp.append(c)
-    train_table.append(tmp)
-
-
-train_df = pd.DataFrame( train_table, columns=['epoch', 'LR', 'loss', 'acc'])
-
-#print(train_df)
-
-for key in sorted(dict_val.iterkeys()):
-    tmp = []
-    tmp.append(key)
-    a, b, c = dict_val.get(key)
-    tmp.append(b)
-    tmp.append(c)
-    val_table.append(tmp)
-
-
-val_df = pd.DataFrame( val_table, columns=['epoch', 'loss', 'acc'])
-
-#print(val_df)
-ax = plt.subplot(111, frame_on=False) # no visible frame
-ax.xaxis.set_visible(False)  # hide the x axis
-ax.yaxis.set_visible(False)  # hide the y axis
-table(ax, val_df, rowLabels=['']*val_df.shape[0], loc='center')
-
-plt.savefig('mytable.pdf', bbox_inches='tight')
-'''
+        dict_val[float(epoch)] = found_text
 
 train_x = []
-train_y1 = []
-train_y2 = []
-train_y3 = []
-
+train_y = {}
 for key in sorted(dict_train.iterkeys()):
     #print(key)
     train_x.append(key)
-    a, b, c = dict_train.get(key)
-    train_y1.append(a)
-    train_y2.append(b)
-    train_y3.append(c)
+    names_and_numbers = dict_train.get(key)
+
+    for k, v in names_and_numbers:
+        if not train_y.get(k):
+            train_y[k] = []
+        train_y[k].append(v)
 
 val_x = []
-val_y1 = []
-val_y2 = []
-val_y3 = []
-
+val_y = {}
 for key in sorted(dict_val.iterkeys()):
+    #print(key)
     val_x.append(key)
-    a, b, c = dict_val.get(key)
-    val_y2.append(b)
-    val_y3.append(c)
+    names_and_numbers = dict_val.get(key)
+
+    for k, v in names_and_numbers:
+        if not val_y.get(k):
+            val_y[k] = []
+        val_y[k].append(v)
 
 
-plt.figure(num=3, figsize=(10, 10),)
+sub_number = 100*len(train_y)+10
 
-plt.subplot(312)
-plt.grid()
-plt.plot(train_x, train_y2)
-plt.plot(val_x, val_y2, color='red', linestyle='--')
-plt.xlim(0,train_x[-1]+1)
-plt.ylim(0,)
-#plt.xlabel("epoch")
-plt.ylabel("Loss")
+#for key in train_y.iterkeys():
+#    print(key)
+#    for v in train_y.get(key):
+#        print(v)
 
-plt.subplot(311)
-plt.grid()
-plt.plot(train_x, train_y3)
-plt.plot(val_x, val_y3, color='red', linestyle='--')
-plt.xlim(0,train_x[-1]+1)
-plt.ylim(0,1)
-#plt.xlabel("epoch")
-plt.ylabel("Acc")
+#for key in val_y.iterkeys():
+#    print(key)
+#    for v in val_y.get(key):
+#        print(v)
 
-plt.text(train_x[-1]/4, 1.2, r'Val',
-         fontdict={'size': 16, 'color':'r'})
-plt.text(train_x[-1]/4*3, 1.2, r'Train',
-         fontdict={'size': 16, 'color':'b'})
 
-#print(len(val_y2))
-#print(len(val_x))
+plt.figure(figsize=(10, 5*len(train_y)),)
+# set title of all
+plt.suptitle(file_name, fontsize=24)
 
-plt.subplot(313)
-plt.grid()
-plt.plot(train_x, train_y1)
-plt.xlim(0,train_x[-1]+1)
-plt.ylim(-0.1,)
-plt.xlabel("epoch")
-plt.ylabel("LR")
+for key in train_y.iterkeys():
+    # change section of subfigure
+    sub_number += 1
+    plt.subplot(sub_number)
 
-#plt.show()
+    #print(key)
+    # point grid line
+    plt.grid()
+    # add space between subfigures
+    plt.subplots_adjust(hspace=0.5)
 
-#plt.subplot(414)
-#val_x_idx = [i for i in range(0, len(val_x), len(val_x)//8)]
-#val_y2_idx = [i for i in range(0, len(val_y2), len(val_y2)//8)]
-#val_y3_idx = [i for i in range(0, len(val_y3), len(val_y3)//8)]
+    # set train data points
+    train_values = train_y.get(key)
+    plt.plot(train_x, train_values)
 
-#val_x_tmp = [val_x[i] for i in val_x_idx]
-#val_y2_tmp = [val_y2[i] for i in val_y2_idx]
-#val_y3_tmp = [val_y3[i] for i in val_y3_idx]
-#print(val_x_tmp)
-#the_table = plt.table(cellText=[val_y2_tmp, val_y3_tmp],
-#                      colWidths=[0.15]*9,
-#                      colLabels=val_x_tmp,
-#                      rowLabels=['val_loss', 'val_acc'],
-#                      loc='bottom')
-#plt.subplots_adjust(left=0.1, bottom=-0.5)
+    # set validation data points
+    if val_y.get(key):
+        val_values = val_y.get(key)
+        plt.plot(val_x, val_values, color='red', linestyle='--')
 
+    # set range of x axie and y axie
+    plt.xlim(0,train_x[-1]+1)
+    if(key.startswith('acc')):
+        plt.ylim(0,1)
+    else:
+        plt.ylim(0,)
+
+    # set label
+    plt.xlabel("epoch")
+    plt.ylabel(key)
+
+    # get figure size range
+    axes = plt.gca()
+    bottom, top = axes.get_ylim()
+    left, right = axes.get_xlim()
+    height = top - bottom
+    width = right - left
+
+    # set string we need
+    plt.text(right + 0.03*width, top - 0.1*height, r'Train',
+             fontdict={'size': 16, 'color':'b'})
+    if val_y.get(key):
+        plt.text(right + 0.03*width, top - 0.2*height, r'Val',
+                fontdict={'size': 16, 'color':'r'})
 
 plt.savefig(file_out+'.png')
-
-
-
-
-

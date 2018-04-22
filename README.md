@@ -14,9 +14,12 @@
 #### If found, it will catch four parameters in the line, and store them into train or val dictionary.
 
 * lr = *[%d.%d]*
+* epoch *[%d.%d]*
+
+#### And every pattern match 'a = b', ex.:
+
 * accuracy = *[%d.%d]*
 * loss = *[%d.%d]*
-* epoch *[%d.%d]*
 
 #### Finally, polling those two dictionary, and output PNG figure like this:
 
